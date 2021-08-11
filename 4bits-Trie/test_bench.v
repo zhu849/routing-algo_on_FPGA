@@ -23,12 +23,7 @@ reg [31:0] ip_mem [0:10260];
 reg [7:0] nexthop_mem [0:10260];
 integer i, err;
 
-
-initial
-begin
-	$readmemh("./ip.txt", ip_mem);
-	$readmemh("./golden_nexthop.txt", nexthop_mem);
-end
+always #(`CYCLE/2) clk=~clk;
 
 four_bits_trie fbt(
 	.nexthop(nexthop),
@@ -38,11 +33,10 @@ four_bits_trie fbt(
 	.rst(rst)
 );
 
-always #(`CYCLE/2) clk=~clk;
-
-
 initial 
 begin
+	$readmemh("./ip.txt", ip_mem);
+	$readmemh("./golden_nexthop.txt", nexthop_mem);
 	ip = 0;
 	clk = 0;
 	rst = 1;
@@ -66,6 +60,7 @@ begin
 	begin
 		@(posedge clk)
 			ip = ip_mem[i];
+			$display( "%dst: nexthop = [%d] not expected [%d]", i-10, nexthop, nexthop_mem[i-10]); 
 			if(i>9)
 				if(nexthop != nexthop_mem[i-10])
 				begin

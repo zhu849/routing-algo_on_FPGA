@@ -8,16 +8,14 @@
 
 `include "stage_ram.v"
 
-module stride_find
+module leaf_find
 #( 
-	parameter FILE_NAME = "stageX_ram.txt",
+	parameter FILE_NAME = "stage7_ram.txt",
 	parameter NUM_ENTRY = 0,
-	parameter READ_DATA_WIDTH = 0, // read file data width = exist(1) + nexthop(8) + next stage index(vaiable) 
 	parameter RAM_DATA_WIDTH = 0
 )
 (
 	output reg [7:0] nexthop_out,
-	output reg [READ_DATA_WIDTH-9-1:0] next_stage_index,
 	
 	input [3:0] stride, // index in one 16-entry block
 	input [7:0] nexthop_in,
@@ -35,14 +33,14 @@ function integer log2;
     end
 endfunction // log2
 
-wire [READ_DATA_WIDTH-1:0] ram_data; // data width = exist(1) + nexthop(8) + DATA_WIDTH(variable)
+wire [8:0] ram_data; // data width = exist(1) + nexthop(8)
 
 stage_ram
 #(
 	.FILE_NAME(FILE_NAME),
 	.NUM_ENTRY(NUM_ENTRY),
 	.ADDR_LEN(RAM_DATA_WIDTH+4),
-	.DATA_WIDTH(READ_DATA_WIDTH)
+	.DATA_WIDTH(9)
 )
 sr(
 	.clk(clk),
@@ -55,15 +53,12 @@ begin
 	if(rst)
 	begin
 		nexthop_out <= 8'b0;
-		next_stage_index <= 0;
 	end
 	else
 	begin
-		next_stage_index <= ram_data[READ_DATA_WIDTH-9-1:0];
-
 		// check if this nexthop exist, 0 mean yes, 1 mean no
-		if(ram_data[READ_DATA_WIDTH-2:READ_DATA_WIDTH-9]!=0)
-			nexthop_out <= ram_data[READ_DATA_WIDTH-2:READ_DATA_WIDTH-9]; // assign this stage nexthop
+		if(ram_data[7:0]!=0)
+			nexthop_out <= ram_data[7:0]; // assign this stage nexthop
 		else
 			nexthop_out <= nexthop_in;
 	end

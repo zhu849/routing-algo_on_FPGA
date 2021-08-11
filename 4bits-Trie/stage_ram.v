@@ -13,7 +13,7 @@ module stage_ram
 	parameter FILE_NAME = "stage_ram.txt",
 	parameter NUM_ENTRY = 0, // # of this ram's height(entry)
 	parameter DATA_WIDTH = 0, // data width = exist bit(1) + nexthop(8) + next_stage_address(variable)
-	parameter ADDR_LEN = 0
+	parameter ADDR_LEN = 0 // use to indicated that in ram's index use bits
 )
 (
 	output reg [DATA_WIDTH-1:0] dout,
@@ -25,11 +25,13 @@ module stage_ram
 (* ROM_STYLE="AUTO" *) reg [DATA_WIDTH-1:0] rule_ram [NUM_ENTRY-1:0];// mem define
 
 initial
+begin
 	$readmemb(FILE_NAME, rule_ram, 0, NUM_ENTRY-1);// read data from ram file
-
+end
 
 always@(posedge clk)
 begin
 	dout <= rule_ram[addr];
+	$display("filename:%s, addr:%d, rule ram :%b\n",FILE_NAME,addr,rule_ram[addr]);
 end
 endmodule
